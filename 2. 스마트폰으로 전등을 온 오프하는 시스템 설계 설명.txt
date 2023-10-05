@@ -1,0 +1,80 @@
+1. 회로 연결
+1-1 릴레이 모듈
+아두이노 연결 
+S : 3번 핀
++ : 브레드 보드의 +에 연결
+- : 브레드 보드의 -에 연결
+1-2 LED와 연결
+COM : 브레드 보드의 +에 연결
+NO : LED의 신호핀과 연결
+
+2. 코드
+App Inventor에서 만든 앱이 아두이노와 통신하기 위해 필요한 
+HTTP 요청을 처리할 수 있는 웹 서버가 필요합니다. 
+Node.js와 Express를 사용할 것입니다.
+
+2-1. Node.js 및 Express 서버 설정:
+먼저 Node.js와 Express를 사용하여 간단한 웹 서버를 만들고, 
+App Inventor에서 보낸 HTTP 요청을 처리하도록 합니다.
+
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.post('/control-relay', (req, res) => {
+  const command = req.body.command;
+  // 여기에서 아두이노를 제어하는 코드를 작성합니다.
+  console.log('Received command:', command);
+  res.send('Command received.');
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+2-3. App Inventor 설정:
+App Inventor에서는 버튼을 만들어서 이를 누를 때마다 Node.js 서버에 요청을 보내도록 합니다. 또한, 웹 서버의 URL을 사용하여 요청을 보내도록 합니다.
+App Inventor Designer에서 버튼을 추가하고, 버튼의 Click 이벤트에 Web1.GotText 블록을 연결합니다.
+Web 컴포넌트(Web1)의 Url 속성에 Node.js 서버의 주소와 포트를 입력합니다.
+App Inventor Blocks Editor에서 블록을 구성합니다.
+
+2-4. 프로세싱 코드:
+프로세싱 코드를 수정하여 버튼 클릭 시 HTTP 요청을 보내도록 합니다.
+import processing.net.*;
+
+Client client;
+
+void setup() {
+  size(200, 200);
+  client = new Client(this, "localhost", 3000);  // Node.js 서버의 주소와 포트
+}
+
+void draw() {
+  // Draw buttons
+  fill(200);
+  rect(50, 50, 100, 50);
+  fill(0);
+  text("Turn On", 80, 80);
+
+  fill(200);
+  rect(50, 120, 100, 50);
+  fill(0);
+  text("Turn Off", 75, 150);
+}
+
+void mousePressed() {
+  if (mouseX > 50 && mouseX < 150 && mouseY > 50 && mouseY < 100) {
+    // 'Turn On' 버튼 클릭 시 HTTP 요청을 보냄
+    client.write("command=1");
+  } else if (mouseX > 50 && mouseX < 150 && mouseY > 120 && mouseY < 170) {
+    // 'Turn Off' 버튼 클릭 시 HTTP 요청을 보냄
+    client.write("command=0");
+  }
+}
+
+3. 실행
+Node.js 서버를 실행하고, 프로세싱 코드를 실행합니다.
+App Inventor 앱을 빌드하고, 앱을 휴대폰에 설치하여 버튼을 클릭하여 아두이노를 제어할 수 있습니다.
