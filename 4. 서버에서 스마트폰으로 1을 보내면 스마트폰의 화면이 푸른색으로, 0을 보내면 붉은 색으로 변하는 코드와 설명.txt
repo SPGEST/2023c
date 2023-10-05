@@ -1,0 +1,50 @@
+1. App Inventor 앱 설정:
+
+App Inventor로 들어가서 새 프로젝트를 생성합니다.
+Button 컴포넌트를 두 개 추가하고, 이름을 각각 ButtonBlue와 ButtonRed로 설정합니다.
+ButtonBlue의 Text 속성을 "Send 1"로, ButtonRed의 Text 속성을 "Send 0"로 설정합니다.
+Web 컴포넌트를 추가하고, 이름을 Web1로 설정합니다.
+
+2. 블록설정
+// Send 1 to Processing server
+ButtonBlue.Click:
+Web1.Url = "http://YOUR_PROCESSING_SERVER_IP:PORT/control-relay";
+Web1.PostText("command=1");
+
+// Send 0 to Processing server
+ButtonRed.Click:
+Web1.Url = "http://YOUR_PROCESSING_SERVER_IP:PORT/control-relay";
+Web1.PostText("command=0");
+
+위의 블록은 ButtonBlue를 누르면 "1", ButtonRed를 누르면 "0"을 Processing 서버로 보내도록 구성되어 있습니다. 
+YOUR_PROCESSING_SERVER_IP에는 Processing 서버의 IP 주소 또는 도메인을, PORT에는 사용하는 포트 번호를 넣어야 합니다.
+
+3. Processing 코드
+import processing.net.*;
+
+int backgroundColor = 0;  // 초기 배경색을 검은색(0)으로 설정
+int port = 12345;  // 포트 번호
+Server server;
+
+void setup() {
+  size(400, 400);
+  server = new Server(this, port);
+}
+
+void draw() {
+  background(backgroundColor);  // 현재 배경색으로 화면 채우기
+}
+
+void serverEvent(Server someServer, Client client) {
+  String data = client.readString();  // 클라이언트로부터 데이터 읽기
+  if (data != null && data.length() > 0) {
+    data = data.trim();
+    println("Received data: " + data);
+
+    if (data.equals("1")) {
+      backgroundColor = color(0, 0, 255);  // 1을 받으면 푸른색으로 설정
+    } else if (data.equals("0")) {
+      backgroundColor = color(255, 0, 0);  // 0을 받으면 붉은색으로 설정
+    }
+  }
+}
